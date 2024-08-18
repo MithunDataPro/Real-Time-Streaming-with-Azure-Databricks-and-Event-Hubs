@@ -55,3 +55,42 @@ In this project, we're generating fake weather data in JSON format. The data inc
   "conditions": "Partly Cloudy"
 }
 ```
+
+## Tools Used
+
+- **Azure Event Hubs:** For ingesting streaming data.
+- **Databricks:** For processing the data using Spark Structured Streaming.
+- **Delta Lake:** For storing data in a structured format across Bronze, Silver, and Gold layers.
+- **Azure Data Lake Storage (ADLS):** For long-term storage of data.
+- **Unity Catalog:** For managing metadata and ensuring data governance.
+- **Power BI:** For creating reports and visualizing the processed data.
+
+## Project Plan
+
+### Data Ingestion:
+
+1. Set up Azure Event Hubs to receive streaming data.
+2. Create a Databricks workspace and connect it to Azure Event Hubs.
+
+### Data Processing:
+
+1. Implement Spark Structured Streaming in Databricks to process the data.
+2. Store the raw data in the Bronze layer.
+3. Apply transformations to create Silver data.
+4. Aggregate and refine the data to store it in the Gold layer.
+
+### Data Serving:
+
+1. Connect Power BI to the Gold layer in Delta Lake.
+2. Create a Power BI report to visualize the weather data.
+
+### Testing:
+
+1. Validate the data processing pipeline by generating test data.
+2. Ensure the data flows correctly from Azure Event Hubs through to Power BI.
+
+### Deployment:
+
+1. Deploy the solution in a production environment.
+2. Monitor the data pipeline and adjust as needed for performance and scalability.
+
