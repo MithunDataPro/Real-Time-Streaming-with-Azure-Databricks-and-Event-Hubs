@@ -6,7 +6,8 @@ This project demonstrates an end-to-end real-time data streaming solution using 
 
 ### Architecture
 
-![Solution Overview](image_link_here)
+![Solution Architecture](Assests/Solution%20Architech.png)
+
 
 The architecture is divided into three main stages:
 
