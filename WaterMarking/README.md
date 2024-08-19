@@ -18,12 +18,16 @@ Generally speaking, when working with real-time streaming data, there will be de
 
 While the natural inclination to remedy these issues might be to use a fixed delay based on the wall clock time, we will show in this upcoming example why this is not the best solution.
 
+![Solution Architecture](WaterMarking/Assests/watermarking.png)
+
 ### Example: Watermarking in Action
 Let’s take a scenario where we are receiving data at various times from around 10:50 AM to 11:20 AM. We are creating 10-minute tumbling windows that calculate the average of the temperature and pressure readings that came in during the windowed period.
 
 In this first scenario, the tumbling windows trigger at 11:00 AM, 11:10 AM, and 11:20 AM, leading to the result tables shown at the respective times. When the second batch of data comes around 11:10 AM with data that has an event time of 10:53 AM, this gets incorporated into the temperature and pressure averages calculated for the 11:00 AM to 11:10 AM window that closes at 11:10 AM, which does not give the correct result.
 
 To ensure we get the correct results for the aggregates we want to produce, we need to define a watermark that will allow Spark to understand when to close the aggregate window and produce the correct aggregate result.
+
+![Solution Architecture](WaterMarking/Assests/water marking 2.png)
 
 ### How Watermarking Works
 In **Structured Streaming** applications, we can ensure that all relevant data for the aggregations we want to calculate is collected by using a feature called watermarking. By defining a watermark, Spark Structured Streaming then knows when it has ingested all data up to some time, T, based on a set lateness expectation, so that it can close and produce windowed aggregates up to timestamp T.
