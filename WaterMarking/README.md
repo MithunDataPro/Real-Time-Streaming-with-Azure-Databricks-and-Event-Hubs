@@ -27,7 +27,7 @@ In this first scenario, the tumbling windows trigger at 11:00 AM, 11:10 AM, and 
 
 To ensure we get the correct results for the aggregates we want to produce, we need to define a watermark that will allow Spark to understand when to close the aggregate window and produce the correct aggregate result.
 
-![Watermarking Image B](Assests/water_marking_b.png)
+https://github.com/MithunDataPro/Real-Time-Streaming-with-Azure-Databricks-and-Event-Hubs/blob/main/Assests/water_marking_b.png?raw=true
 
 ### How Watermarking Works
 In **Structured Streaming** applications, we can ensure that all relevant data for the aggregations we want to calculate is collected by using a feature called watermarking. By defining a watermark, Spark Structured Streaming then knows when it has ingested all data up to some time, T, based on a set lateness expectation, so that it can close and produce windowed aggregates up to timestamp T.
