@@ -18,7 +18,7 @@ Generally speaking, when working with real-time streaming data, there will be de
 
 While the natural inclination to remedy these issues might be to use a fixed delay based on the wall clock time, we will show in this upcoming example why this is not the best solution.
 
-![Solution Architecture](WaterMarking/Assests/watermarking.png)
+![Solution Architecture](WaterMarking/Assests/water_marking.png)
 
 ### Example: Watermarking in Action
 Let’s take a scenario where we are receiving data at various times from around 10:50 AM to 11:20 AM. We are creating 10-minute tumbling windows that calculate the average of the temperature and pressure readings that came in during the windowed period.
