@@ -150,3 +150,14 @@ spark.conf.set(
   "spark.sql.streaming.stateStore.providerClass",
   "com.databricks.sql.streaming.state.RocksDBStateStoreProvider")
 ```
+
+## Monitoring Metrics
+Key metrics to track include those provided by **StreamingQueryProgress** and **StateOperatorProgress** objects:
+
+- **eventTime**: Max, min, avg, and watermark timestamps.
+- **numRowsDroppedByWatermark**: Indicates rows considered too late to be included in stateful aggregation.
+
+These metrics are essential for reconciling data in result tables and ensuring that watermarks are configured correctly.
+
+## Multiple Aggregations, Streaming, and Watermarks
+A current limitation of Structured Streaming queries is the inability to chain multiple stateful operators (e.g., aggregations, streaming joins) in a single streaming query. This limitation is being addressed by Databricks as part of their ongoing improvements to the platform.
