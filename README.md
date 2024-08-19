@@ -95,3 +95,32 @@ In this project, we're generating fake weather data in JSON format. The data inc
 1. Deploy the solution in a production environment.
 2. Monitor the data pipeline and adjust as needed for performance and scalability.
 
+## Notes on Real-Time Data Processing with Azure Databricks and Event Hubs
+
+### Output Modes in Spark Structured Streaming
+
+The behavior of different output modes in Spark Structured Streaming is as follows:
+
+| Output Mode | Behaviour |
+|-------------|-----------|
+| **Complete** | The entire updated result table is written to external storage. |
+| **Append**   | Only new rows appended in the result table since the last trigger are written to external storage. |
+| **Update**   | Only the rows that were updated in the result table since the last trigger are written to external storage. If the query doesn't contain aggregations, it is equivalent to Append mode. |
+
+### Checkpointing in Spark Structured Streaming
+
+- Spark Structured Streaming processes both historical and real-time data with exactly-once semantics.
+- Checkpointing is used to prevent duplicate outputs during `writeStream` operations, even after job restarts or failures.
+
+### Windowing in Spark Structured Streaming
+
+- **Windowing Behavior**: The latest window will close when an event with an event time later than 3:25 is received.
+  - This is because the upper bound of the window is 3:20.
+  - So, an event time after 3:25 is greater than the upper bound plus 5 minutes.
+
+### Power BI Integration
+
+To connect with Power BI, you can use [Partner Connect](https://learn.microsoft.com/en-us/power-bi/connect-data/service-partner-connect) for seamless integration between Databricks and Power BI.
+
+
+
