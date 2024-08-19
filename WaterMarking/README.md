@@ -18,7 +18,8 @@ Generally speaking, when working with real-time streaming data, there will be de
 
 While the natural inclination to remedy these issues might be to use a fixed delay based on the wall clock time, we will show in this upcoming example why this is not the best solution.
 
-![Watermarking Image](Assests/water_marking.png)
+![image](https://github.com/user-attachments/assets/da109148-8871-45ea-b4a4-badbe464b852)
+
 
 ### Example: Watermarking in Action
 Let’s take a scenario where we are receiving data at various times from around 10:50 AM to 11:20 AM. We are creating 10-minute tumbling windows that calculate the average of the temperature and pressure readings that came in during the windowed period.
@@ -27,7 +28,8 @@ In this first scenario, the tumbling windows trigger at 11:00 AM, 11:10 AM, and 
 
 To ensure we get the correct results for the aggregates we want to produce, we need to define a watermark that will allow Spark to understand when to close the aggregate window and produce the correct aggregate result.
 
-https://github.com/MithunDataPro/Real-Time-Streaming-with-Azure-Databricks-and-Event-Hubs/blob/main/Assests/water_marking_b.png?raw=true
+![image](https://github.com/user-attachments/assets/05a399f6-fbad-4565-992c-9a9b644cb5c8)
+
 
 ### How Watermarking Works
 In **Structured Streaming** applications, we can ensure that all relevant data for the aggregations we want to calculate is collected by using a feature called watermarking. By defining a watermark, Spark Structured Streaming then knows when it has ingested all data up to some time, T, based on a set lateness expectation, so that it can close and produce windowed aggregates up to timestamp T.
@@ -96,4 +98,55 @@ sensorStreamDF = sensorStreamDF \
 .groupBy(window(sensorStreamDF.eventTimestamp, "10 minutes")) \
 .avg(sensorStreamDF.temperature,
      sensorStreamDF.pressure)
+```
+
+## Watermarks in Different Output Modes
+Before diving deeper, it's important to understand how your choice of output mode affects the behavior of the watermarks you set.
+
+- **Append Mode**: An aggregate can be produced only once and cannot be updated. Therefore, late records are dropped after the watermark delay period.
+- **Update Mode**: The aggregate can be produced repeatedly, starting from the first record, so a watermark is optional. It trims the state once the engine heuristically knows that no more records for that aggregate can be received.
+
+### Implications of Watermarks on State and Latency
+- **Longer Watermark Delay**: Higher precision, but also higher latency.
+- **Shorter Watermark Delay**: Lower precision, but lower latency.
+
+## Deeper Dive into Watermarking
+
+### Joins and Watermarking
+When doing join operations in your streaming applications, particularly when joining two streams, it is important to use watermarks to handle late records and trim the state. An example of a streaming join with watermarks is shown below:
+
+```
+
+sensorStreamDF = spark.readStream.format("delta").table("sensorData")
+tempAndPressStreamDF = spark.readStream.format("delta").table("tempPressData")
+
+sensorStreamDF_wtmrk = sensorStreamDF.withWatermark("timestamp", "5 minutes")
+tempAndPressStreamDF_wtmrk = tempAndPressStreamDF.withWatermark("timestamp", "5 minutes")
+
+joinedDF = tempAndPressStreamDF_wtmrk.alias("t").join(
+ sensorStreamDF_wtmrk.alias("s"),
+ expr("""
+   s.sensor_id == t.sensor_id AND
+   s.timestamp >= t.timestamp AND
+   s.timestamp <= t.timestamp + interval 5 minutes
+   """),
+ joinType="inner"
+).withColumn("sensorMeasure", col("Sensor1")+col("Sensor2")) \
+.groupBy(window(col("t.timestamp"), "10 minutes")) \
+.agg(avg(col("sensorMeasure")).alias("avg_sensor_measure"), avg(col("temperature")).alias("avg_temperature"), avg(col("pressure")).alias("avg_pressure")) \
+.select("window", "avg_sensor_measure", "avg_temperature", "avg_pressure")
+
+joinedDF.writeStream.format("delta") \
+       .outputMode("append") \
+       .option("checkpointLocation", "/checkpoint/files/") \
+       .toTable("output_table")
+```
+
+## Monitoring and Managing Streams with Watermarks
+When managing a streaming query, where Spark may need to manage millions of keys and keep state for each of them, the default state store may not be effective. To mitigate this, RocksDB can be leveraged in Databricks to efficiently manage state.
+
+```
+spark.conf.set(
+  "spark.sql.streaming.stateStore.providerClass",
+  "com.databricks.sql.streaming.state.RocksDBStateStoreProvider")
 ```
