@@ -18,7 +18,8 @@ Generally speaking, when working with real-time streaming data, there will be de
 
 While the natural inclination to remedy these issues might be to use a fixed delay based on the wall clock time, we will show in this upcoming example why this is not the best solution.
 
-![Watermarking Image](WaterMarking/Assests/water_marking.png)
+![Watermarking Image](https://github.com/your-username/your-repo-name/blob/main/WaterMarking/Assests/water_marking.png)
+
 
 
 ### Example: Watermarking in Action
@@ -28,7 +29,7 @@ In this first scenario, the tumbling windows trigger at 11:00 AM, 11:10 AM, and 
 
 To ensure we get the correct results for the aggregates we want to produce, we need to define a watermark that will allow Spark to understand when to close the aggregate window and produce the correct aggregate result.
 
-![Watermarking Image B](WaterMarking/Assests/water_marking_b.png)
+![Watermarking Image B](https://github.com/your-username/your-repo-name/blob/main/WaterMarking/Assests/water_marking_b.png)
 
 ### How Watermarking Works
 In **Structured Streaming** applications, we can ensure that all relevant data for the aggregations we want to calculate is collected by using a feature called watermarking. By defining a watermark, Spark Structured Streaming then knows when it has ingested all data up to some time, T, based on a set lateness expectation, so that it can close and produce windowed aggregates up to timestamp T.
@@ -61,7 +62,7 @@ sensorStreamDF.writeStream
   .outputMode("append")
   .option("checkpointLocation", "/delta/events/_checkpoints/temp_pressure_job/")
   .start("/delta/temperatureAndPressureAverages")
-
+```
 
 ## Example Output
 The output written to the table for a particular sample of data would look like this:
@@ -80,6 +81,7 @@ The output written to the table for a particular sample of data would look like 
   },
   ...
 ]
+```
 
 ## Key Considerations
 When implementing watermarking, you need to identify two items:
@@ -90,9 +92,10 @@ When implementing watermarking, you need to identify two items:
 
 Here’s how to implement watermarking in your Structured Streaming pipeline:
 
+```
 sensorStreamDF = sensorStreamDF \
 .withWatermark("eventTimestamp", "10 minutes") \
 .groupBy(window(sensorStreamDF.eventTimestamp, "10 minutes")) \
 .avg(sensorStreamDF.temperature,
      sensorStreamDF.pressure)
-
+```
