@@ -18,7 +18,8 @@ Generally speaking, when working with real-time streaming data, there will be de
 
 While the natural inclination to remedy these issues might be to use a fixed delay based on the wall clock time, we will show in this upcoming example why this is not the best solution.
 
-![Solution Architecture](WaterMarking/Assests/water_marking.png)
+![Watermarking Image](WaterMarking/Assests/water_marking.png)
+
 
 ### Example: Watermarking in Action
 Let’s take a scenario where we are receiving data at various times from around 10:50 AM to 11:20 AM. We are creating 10-minute tumbling windows that calculate the average of the temperature and pressure readings that came in during the windowed period.
@@ -27,7 +28,7 @@ In this first scenario, the tumbling windows trigger at 11:00 AM, 11:10 AM, and 
 
 To ensure we get the correct results for the aggregates we want to produce, we need to define a watermark that will allow Spark to understand when to close the aggregate window and produce the correct aggregate result.
 
-![Solution Architecture](WaterMarking/Assests/water_marking_b.png)
+![Watermarking Image B](WaterMarking/Assests/water_marking_b.png)
 
 ### How Watermarking Works
 In **Structured Streaming** applications, we can ensure that all relevant data for the aggregations we want to calculate is collected by using a feature called watermarking. By defining a watermark, Spark Structured Streaming then knows when it has ingested all data up to some time, T, based on a set lateness expectation, so that it can close and produce windowed aggregates up to timestamp T.
@@ -60,4 +61,38 @@ sensorStreamDF.writeStream
   .outputMode("append")
   .option("checkpointLocation", "/delta/events/_checkpoints/temp_pressure_job/")
   .start("/delta/temperatureAndPressureAverages")
+
+
+## Example Output
+The output written to the table for a particular sample of data would look like this:
+
+```json
+[
+  {
+    "window": {
+      "start": "2021-08-29T05:50:00.000+0000",
+      "end": "2021-08-29T06:00:00.000+0000"
+    },
+    "temperature": 33.03,
+    "pressure": 289,
+    "avg(temperature)": 33.03,
+    "avg(pressure)": 289
+  },
+  ...
+]
+
+## Key Considerations
+When implementing watermarking, you need to identify two items:
+
+1. The column that represents the event time of the sensor reading.
+
+2. The estimated expected time skew of the data.
+
+Here’s how to implement watermarking in your Structured Streaming pipeline:
+
+sensorStreamDF = sensorStreamDF \
+.withWatermark("eventTimestamp", "10 minutes") \
+.groupBy(window(sensorStreamDF.eventTimestamp, "10 minutes")) \
+.avg(sensorStreamDF.temperature,
+     sensorStreamDF.pressure)
 
